@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Разучивание реплик — Обыкновенное чудо</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px;
+    background: #f5f1e8;
+    color: #2a2a2a;
+    line-height: 1.55;
+  }
+  h1 { font-size: 1.3em; margin: 0 0 12px; }
+
+  .controls {
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+  }
+  .controls .group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .controls label { font-weight: bold; font-size: 0.9em; white-space: nowrap; }
+  .controls select, .controls input[type=search] {
+    padding: 6px 8px;
+    font-size: 0.95em;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-family: inherit;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .hint { color: #777; font-size: 0.82em; font-style: italic; margin: 0 0 12px; padding: 0 4px; }
+  .stats { font-size: 0.8em; color: #777; flex-basis: 100%; }
+  .controls .toggle { display: flex; align-items: center; gap: 5px; font-size: 0.9em; cursor: pointer; }
+  .controls .toggle input { cursor: pointer; }
+
+  .scene-header {
+    margin: 22px 0 8px;
+    padding: 7px 11px;
+    background: #6b4423;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.92em;
+    scroll-margin-top: 8px;
+  }
+  .line {
+    margin: 6px 0;
+    padding: 7px 10px;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    display: flex;
+    gap: 8px;
+  }
+  .line .num {
+    color: #b0b0b0;
+    min-width: 28px;
+    font-size: 0.75em;
+    padding-top: 3px;
+    text-align: right;
+    user-select: none;
+  }
+  .line .body { flex: 1; min-width: 0; }
+  .role {
+    font-weight: bold;
+    color: #6b4423;
+    margin-right: 4px;
+  }
+  .text { white-space: pre-wrap; word-wrap: break-word; }
+  .stage {
+    background: transparent;
+    box-shadow: none;
+    font-style: italic;
+    color: #777;
+    padding: 3px 10px;
+  }
+  .music {
+    background: transparent;
+    box-shadow: none;
+    color: #b07d2a;
+    padding: 3px 10px;
+    font-size: 0.85em;
+  }
+  .hidden-line {
+    background: #fef6e0;
+    border-left: 4px solid #d4a017;
+    cursor: pointer;
+  }
+  .hidden-line .text {
+    color: transparent;
+    background: #e8dcc0;
+    border-radius: 3px;
+    user-select: none;
+  }
+  .hidden-line.revealed .text {
+    color: #2a2a2a;
+    background: transparent;
+    user-select: text;
+  }
+
+  .empty-msg {
+    text-align: center;
+    padding: 30px 16px;
+    color: #555;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px dashed #d0c8b8;
+  }
+  .empty-msg.drag { background: #fef6e0; border-color: #d4a017; }
+  .empty-msg label.filebtn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #6b4423;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .empty-msg label.filebtn:hover { background: #8a5a30; }
+  .empty-msg .secondary { margin-top: 14px; font-size: 0.88em; color: #888; }
+  mark { background: #fff3a0; padding: 1px 2px; border-radius: 2px; }
+
+  @media (max-width: 600px) {
+    body { padding: 8px; }
+    h1 { font-size: 1.1em; margin-bottom: 8px; }
+    .controls { padding: 8px; gap: 6px; }
+    .controls .group { flex-basis: 100%; }
+    .line { padding: 6px 8px; gap: 6px; }
+    .line .num { min-width: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Обыкновенное чудо — разучивание реплик</h1>
+
+<div class="controls">
+  <div class="group">
+    <label for="role">Роль:</label>
+    <select id="role"><option value="">— все —</option></select>
+  </div>
+  <div class="group">
+    <label for="scene">Сцена:</label>
+    <select id="scene"><option value="">↧ перейти —</option></select>
+  </div>
+  <div class="group" style="flex-basis:100%">
+    <label for="search">Поиск:</label>
+    <input type="search" id="search" placeholder="слова в тексте">
+  </div>
+  <label class="toggle"><input type="checkbox" id="onlyLines"> только реплики</label>
+  <span class="stats" id="stats"></span>
+</div>
+
+<p class="hint">Кликните по жёлтой (скрытой) реплике, чтобы её показать.</p>
+
+<div id="script">
+  <div class="empty-msg" id="loader">
+    <strong>Загрузите файл сценария</strong>
+    <div class="secondary">Перетащите <code>source.txt</code> сюда или выберите файл.<br>Файл сохранится в браузере и загрузится автоматически при следующем открытии.</div>
+    <label class="filebtn">Выбрать файл<input type="file" id="fileInput" accept=".txt,text/plain" style="display:none"></label>
+  </div>
+</div>
+
+<script>
+const KNOWN_ROLES = [
+  'ВОЛШЕБНИК','ЖЕНА ВОЛШЕБНИКА','МЕДВЕДЬ','ПРИНЦЕССА','КОРОЛЬ',
+  'МИНИСТР-АДМИНИСТРАТОР','ПЕРВЫЙ МИНИСТР','ЭМИЛИЯ','АМАНДА','ОРИНТИЯ',
+  'ЭМИЛЬ','ОХОТНИК','УЧЕНИК','ПАЛАЧ','ХОР'
+];
+const ALIASES = {
+  'ЖЕНА': 'ЖЕНА ВОЛШЕБНИКА',
+  'ВОЛШЕБНИЦА': 'ЖЕНА ВОЛШЕБНИКА',
+  'УЧЕНИК ОХОТНИКА': 'УЧЕНИК',
+  'МИНИСТР': 'МИНИСТР-АДМИНИСТРАТОР',
+  'АДМИНИСТРАТОР': 'МИНИСТР-АДМИНИСТРАТОР'
+};
+
+let entries = [];
+let scenes = [];
+let rolesPresent = [];
+
+const roleSelect = document.getElementById('role');
+const sceneSelect = document.getElementById('scene');
+const searchInput = document.getElementById('search');
+const onlyLinesCheckbox = document.getElementById('onlyLines');
+const scriptEl = document.getElementById('script');
+const statsEl = document.getElementById('stats');
+
+const STORAGE_KEY = 'ordinary-miracle-source';
+
+function loadText(text) {
+  try { localStorage.setItem(STORAGE_KEY, text); } catch (e) {}
+  parse(text);
+  render();
+}
+
+function bindLoader() {
+  const loader = document.getElementById('loader');
+  const fileInput = document.getElementById('fileInput');
+  if (fileInput) {
+    fileInput.addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (f) f.text().then(loadText);
+    });
+  }
+  if (loader) {
+    ['dragenter','dragover'].forEach(ev => loader.addEventListener(ev, e => {
+      e.preventDefault(); loader.classList.add('drag');
+    }));
+    ['dragleave','drop'].forEach(ev => loader.addEventListener(ev, e => {
+      e.preventDefault(); loader.classList.remove('drag');
+    }));
+    loader.addEventListener('drop', e => {
+      const f = e.dataTransfer.files[0];
+      if (f) f.text().then(loadText);
+    });
+  }
+}
+
+const cached = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } })();
+if (cached) {
+  parse(cached);
+  render();
+} else {
+  fetch('source.txt').then(r => {
+    if (!r.ok) throw new Error('not found');
+    return r.text();
+  }).then(loadText).catch(() => { bindLoader(); });
+}
+
+function normalizeRole(name) {
+  const up = name.trim().toUpperCase().replace(/\s+/g, ' ');
+  return ALIASES[up] || (KNOWN_ROLES.includes(up) ? up : up);
+}
+function isRoleLineStart(s) {
+  const m = s.match(/^([А-ЯЁ][А-ЯЁ \-]{1,40}?)\.(?:\s|\t)*(.*)$/);
+  if (!m) return null;
+  const name = m[1].trim();
+  if (name.length < 3) return null;
+  const up = name.toUpperCase().replace(/\s+/g, ' ');
+  if (KNOWN_ROLES.includes(up) || ALIASES[up]) return { role: normalizeRole(name), rest: m[2] };
+  return null;
+}
+
+function parse(text) {
+  entries = []; scenes = [];
+  const rolesSet = new Set();
+  const rawLines = text.split(/\r?\n/);
+  let started = false, currentScene = null, currentSpeaker = null, buffer = [];
+
+  function flush() {
+    if (currentSpeaker && buffer.length) {
+      const body = buffer.join('\n').trim();
+      if (body) { entries.push({ kind:'line', role:currentSpeaker, text:body, scene:currentScene }); rolesSet.add(currentSpeaker); }
+    }
+    buffer = []; currentSpeaker = null;
+  }
+
+  for (let raw of rawLines) {
+    let s = raw.replace(/\t/g, ' ').trim();
+    if (!s) { flush(); continue; }
+    if (/^[🎵🎶]/.test(s)) { flush(); if (started) entries.push({ kind:'music', text:s, scene:currentScene }); continue; }
+    const sm = s.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
+    if (sm) {
+      flush();
+      const label = 'СЦЕНА ' + sm[1] + (sm[2] ? ' ' + sm[2] : '');
+      if (!started) { currentScene = label; continue; }
+      currentScene = label;
+      if (!scenes.includes(label)) scenes.push(label);
+      entries.push({ kind:'scene', text:label, scene:label });
+      continue;
+    }
+    if (s === 'СТОП' || /^_+$/.test(s)) { flush(); continue; }
+    const rl = isRoleLineStart(s);
+    if (rl) {
+      flush();
+      currentSpeaker = rl.role;
+      if (rl.rest) buffer.push(rl.rest);
+      if (!started) {
+        started = true;
+        if (currentScene && !scenes.includes(currentScene)) {
+          scenes.push(currentScene);
+          entries.push({ kind:'scene', text:currentScene, scene:currentScene });
+        }
+      }
+      continue;
+    }
+    if (!started) continue;
+    if (currentSpeaker) {
+      if (s.startsWith('(') && s.endsWith(')')) {
+        flush();
+        entries.push({ kind:'stage', text:s, scene:currentScene });
+      } else buffer.push(s);
+    } else entries.push({ kind:'stage', text:s, scene:currentScene });
+  }
+  flush();
+
+  rolesPresent = Array.from(rolesSet).sort();
+  roleSelect.innerHTML = '<option value="">— все —</option>' +
+    rolesPresent.map(r => `<option value="${r}">${r}</option>`).join('');
+  sceneSelect.innerHTML = '<option value="">↧ перейти —</option>' +
+    scenes.map((s, i) => `<option value="scene-${i}">${s.replace(/^СЦЕНА\s+/, '')}</option>`).join('');
+}
+
+function highlight(text, term) {
+  if (!term) return text;
+  const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render() {
+  const hidden = roleSelect.value;
+  const term = searchInput.value.trim();
+  const onlyLines = onlyLinesCheckbox.checked;
+  scriptEl.innerHTML = '';
+  let sceneIdx = -1, total = 0, hiddenCount = 0;
+
+  for (const e of entries) {
+    if (onlyLines && (e.kind === 'stage' || e.kind === 'music')) continue;
+    if (term && e.kind === 'line' && !e.text.toLowerCase().includes(term.toLowerCase()) && !(e.role || '').toLowerCase().includes(term.toLowerCase())) continue;
+
+    if (e.kind === 'scene') {
+      sceneIdx++;
+      const h = document.createElement('div');
+      h.className = 'scene-header';
+      h.id = 'scene-' + sceneIdx;
+      h.textContent = e.text;
+      scriptEl.appendChild(h);
+      continue;
+    }
+    if (e.kind === 'music') {
+      const d = document.createElement('div');
+      d.className = 'music';
+      d.textContent = e.text;
+      scriptEl.appendChild(d);
+      continue;
+    }
+    if (e.kind === 'stage') {
+      const d = document.createElement('div');
+      d.className = 'line stage';
+      d.innerHTML = '<div class="num"></div><div class="body">' + highlight(escapeHtml(e.text), term) + '</div>';
+      scriptEl.appendChild(d);
+      continue;
+    }
+    total++;
+    const div = document.createElement('div');
+    div.className = 'line';
+    const isHidden = hidden && e.role === hidden;
+    if (isHidden) { div.classList.add('hidden-line'); hiddenCount++; }
+
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = total;
+    const body = document.createElement('div');
+    body.className = 'body';
+
+    const roleSpan = document.createElement('span');
+    roleSpan.className = 'role';
+    roleSpan.textContent = e.role + '.';
+    body.appendChild(roleSpan);
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'text';
+    textSpan.innerHTML = ' ' + highlight(escapeHtml(e.text), term);
+    body.appendChild(textSpan);
+
+    if (isHidden) div.addEventListener('click', () => div.classList.toggle('revealed'));
+
+    div.appendChild(num);
+    div.appendChild(body);
+    scriptEl.appendChild(div);
+  }
+
+  statsEl.textContent = hidden
+    ? `${hidden}: ${hiddenCount} скрыто из ${total}`
+    : `Всего реплик: ${total}`;
+}
+
+roleSelect.addEventListener('change', render);
+searchInput.addEventListener('input', render);
+onlyLinesCheckbox.addEventListener('change', render);
+sceneSelect.addEventListener('change', () => {
+  const v = sceneSelect.value;
+  if (!v) return;
+  const el = document.getElementById(v);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  sceneSelect.value = '';
+});
+</script>
+
+</body>
+</html>
