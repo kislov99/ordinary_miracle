@@ -85,6 +85,7 @@
     margin-right: 4px;
   }
   .text { white-space: pre-wrap; word-wrap: break-word; }
+  .text i.inline-stage { color: #888; font-style: italic; }
   .stage {
     background: transparent;
     box-shadow: none;
@@ -110,11 +111,13 @@
     border-radius: 3px;
     user-select: none;
   }
+  .hidden-line .text i.inline-stage { color: transparent; background: #e8dcc0; }
   .hidden-line.revealed .text {
     color: #2a2a2a;
     background: transparent;
     user-select: text;
   }
+  .hidden-line.revealed .text i.inline-stage { color: #888; background: transparent; }
 
   .empty-msg {
     text-align: center;
@@ -139,6 +142,32 @@
   .empty-msg .secondary { margin-top: 14px; font-size: 0.88em; color: #888; }
   mark { background: #fff3a0; padding: 1px 2px; border-radius: 2px; }
 
+  .action-bar {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    display: none;
+    gap: 6px;
+    background: rgba(255,255,255,0.96);
+    padding: 7px 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    z-index: 100;
+  }
+  .action-bar button {
+    padding: 7px 11px;
+    font-size: 0.88em;
+    font-family: inherit;
+    background: #6b4423;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .action-bar button:hover { background: #8a5a30; }
+  .action-bar button:disabled { background: #c0b8a8; cursor: default; }
+
   @media (max-width: 600px) {
     body { padding: 8px; }
     h1 { font-size: 1.1em; margin-bottom: 8px; }
@@ -146,6 +175,8 @@
     .controls .group { flex-basis: 100%; }
     .line { padding: 6px 8px; gap: 6px; }
     .line .num { min-width: 22px; }
+    .action-bar { bottom: 6px; right: 6px; padding: 5px 6px; }
+    .action-bar button { padding: 6px 8px; font-size: 0.82em; }
   }
 </style>
 </head>
@@ -175,9 +206,15 @@
 <div id="script">
   <div class="empty-msg" id="loader">
     <strong>Загрузите файл сценария</strong>
-    <div class="secondary">Перетащите <code>source.txt</code> сюда или выберите файл.<br>Файл сохранится в браузере и загрузится автоматически при следующем открытии.</div>
-    <label class="filebtn">Выбрать файл<input type="file" id="fileInput" accept=".txt,text/plain" style="display:none"></label>
+    <div class="secondary">Перетащите <code>.docx.html</code> (или <code>source.txt</code>) сюда или выберите файл.<br>Файл сохранится в браузере и загрузится автоматически при следующем открытии.</div>
+    <label class="filebtn">Выбрать файл<input type="file" id="fileInput" accept=".html,.htm,.txt,text/html,text/plain" style="display:none"></label>
   </div>
+</div>
+
+<div class="action-bar" id="actionBar">
+  <button id="btnHideAll" title="Снова скрыть все реплики">Скрыть все</button>
+  <button id="btnShowAll" title="Показать все скрытые реплики">Показать все</button>
+  <button id="btnNext" title="Перейти к следующей скрытой реплике">Следующая →</button>
 </div>
 
 <script>
@@ -205,11 +242,100 @@ const onlyLinesCheckbox = document.getElementById('onlyLines');
 const scriptEl = document.getElementById('script');
 const statsEl = document.getElementById('stats');
 
-const STORAGE_KEY = 'ordinary-miracle-source';
+const STORAGE_KEY = 'ordinary-miracle-source-v4';
+
+function findItalicClasses(doc) {
+  const set = new Set();
+  const css = Array.from(doc.querySelectorAll('style')).map(s => s.textContent).join('\n');
+  const re = /\.(c\d+)\s*\{([^}]*)\}/g;
+  let m;
+  while ((m = re.exec(css))) {
+    if (/font-style\s*:\s*italic/i.test(m[2])) set.add(m[1]);
+  }
+  return set;
+}
+
+function isItalicBlock(el, italicClasses) {
+  if (!italicClasses.size) return false;
+  const spans = el.querySelectorAll('span');
+  if (!spans.length) return false;
+  let hasText = false, allItalic = true;
+  for (const sp of spans) {
+    const t = sp.textContent.replace(/\u00A0/g, ' ').trim();
+    if (!t) continue;
+    hasText = true;
+    const classes = sp.className.split(/\s+/);
+    if (!classes.some(c => italicClasses.has(c))) { allItalic = false; break; }
+  }
+  return hasText && allItalic;
+}
+
+function extractInlineText(el, italicClasses) {
+  let out = '';
+  for (const node of el.childNodes) {
+    if (node.nodeType === 3) {
+      out += node.textContent;
+    } else if (node.nodeType === 1) {
+      const tag = node.tagName.toLowerCase();
+      if (tag === 'span') {
+        const classes = (node.className || '').split(/\s+/);
+        const isItalic = classes.some(c => italicClasses.has(c));
+        let t = extractInlineText(node, italicClasses);
+        if (isItalic) {
+          const lead = (t.match(/^\s*/) || [''])[0];
+          const trail = (t.match(/\s*$/) || [''])[0];
+          const core = t.replace(/\u00A0/g, ' ').trim().replace(/^\(+|\)+$/g, '').trim();
+          if (core) t = lead + '(' + core + ')' + trail;
+        }
+        out += t;
+      } else {
+        out += extractInlineText(node, italicClasses);
+      }
+    }
+  }
+  return out;
+}
+
+function htmlToText(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const italicClasses = findItalicClasses(doc);
+  const body = doc.body || doc.documentElement;
+  const blocks = body.querySelectorAll('p, h1, h2, h3, h4, li, div');
+  const out = [];
+  let prevBlank = true;
+  for (const el of blocks) {
+    if (el.querySelector('p, h1, h2, h3, h4, li')) continue;
+    if (el.closest('td.c2, td.c23')) continue;
+    const fullyItalic = isItalicBlock(el, italicClasses);
+    const raw = fullyItalic ? el.textContent : extractInlineText(el, italicClasses);
+    let t = raw.replace(/\u00A0/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    if (!t) {
+      if (!prevBlank) { out.push(''); prevBlank = true; }
+      continue;
+    }
+    if (fullyItalic && !/^СЦЕНА\s/.test(t) && !/^[🎵🎶]/.test(t)) {
+      if (!(t.startsWith('(') && t.endsWith(')'))) t = '(' + t.replace(/^\(+|\)+$/g, '').trim() + ')';
+      if (!prevBlank) { out.push(''); }
+      out.push(t);
+      out.push('');
+      prevBlank = true;
+      continue;
+    }
+    out.push(t);
+    prevBlank = false;
+  }
+  return out.join('\n');
+}
+
+function looksLikeHtml(s) {
+  const head = s.slice(0, 2000).toLowerCase();
+  return /<\s*(!doctype html|html|body|head|p\b|div\b|table\b)/.test(head);
+}
 
 function loadText(text) {
-  try { localStorage.setItem(STORAGE_KEY, text); } catch (e) {}
-  parse(text);
+  const script = looksLikeHtml(text) ? htmlToText(text) : text;
+  try { localStorage.setItem(STORAGE_KEY, script); } catch (e) {}
+  parse(script);
   render();
 }
 
@@ -241,10 +367,20 @@ if (cached) {
   parse(cached);
   render();
 } else {
-  fetch('source.txt').then(r => {
+  fetch('.docx.html').then(r => {
     if (!r.ok) throw new Error('not found');
     return r.text();
-  }).then(loadText).catch(() => { bindLoader(); });
+  }).then(loadText).catch(() => {
+    fetch('docx.html').then(r => {
+      if (!r.ok) throw new Error('not found');
+      return r.text();
+    }).then(loadText).catch(() => {
+      fetch('source.txt').then(r => {
+        if (!r.ok) throw new Error('not found');
+        return r.text();
+      }).then(loadText).catch(() => { bindLoader(); });
+    });
+  });
 }
 
 function normalizeRole(name) {
@@ -329,6 +465,9 @@ function highlight(text, term) {
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function italicizeParens(html) {
+  return html.replace(/\(([^()]+)\)/g, '<i class="inline-stage">($1)</i>');
+}
 
 function render() {
   const hidden = roleSelect.value;
@@ -383,7 +522,7 @@ function render() {
 
     const textSpan = document.createElement('span');
     textSpan.className = 'text';
-    textSpan.innerHTML = ' ' + highlight(escapeHtml(e.text), term);
+    textSpan.innerHTML = ' ' + italicizeParens(highlight(escapeHtml(e.text), term));
     body.appendChild(textSpan);
 
     if (isHidden) div.addEventListener('click', () => div.classList.toggle('revealed'));
@@ -398,7 +537,7 @@ function render() {
     : `Всего реплик: ${total}`;
 }
 
-roleSelect.addEventListener('change', render);
+roleSelect.addEventListener('change', () => { render(); updateActionBar(); });
 searchInput.addEventListener('input', render);
 onlyLinesCheckbox.addEventListener('change', render);
 sceneSelect.addEventListener('change', () => {
@@ -408,6 +547,36 @@ sceneSelect.addEventListener('change', () => {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   sceneSelect.value = '';
 });
+
+const actionBar = document.getElementById('actionBar');
+const btnHideAll = document.getElementById('btnHideAll');
+const btnShowAll = document.getElementById('btnShowAll');
+const btnNext = document.getElementById('btnNext');
+
+function updateActionBar() {
+  actionBar.style.display = roleSelect.value ? 'flex' : 'none';
+}
+
+btnHideAll.addEventListener('click', () => {
+  scriptEl.querySelectorAll('.hidden-line.revealed').forEach(el => el.classList.remove('revealed'));
+});
+btnShowAll.addEventListener('click', () => {
+  scriptEl.querySelectorAll('.hidden-line').forEach(el => el.classList.add('revealed'));
+});
+let nextIdx = -1;
+btnNext.addEventListener('click', () => {
+  const all = Array.from(scriptEl.querySelectorAll('.hidden-line'));
+  if (!all.length) return;
+  const threshold = 60;
+  const visibleIdx = all.findIndex(el => el.getBoundingClientRect().top > threshold);
+  if (nextIdx < 0 || nextIdx >= all.length - 1 || visibleIdx > nextIdx + 1) {
+    nextIdx = visibleIdx >= 0 ? visibleIdx : 0;
+  } else {
+    nextIdx++;
+  }
+  all[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+roleSelect.addEventListener('change', () => { nextIdx = -1; });
 </script>
 
 </body>
