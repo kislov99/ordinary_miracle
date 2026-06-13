@@ -61,6 +61,21 @@
     font-size: 0.92em;
     scroll-margin-top: 8px;
   }
+  .scene-header.has-roles { cursor: pointer; }
+  .scene-header-top::after { content: ' ▾'; opacity: 0.6; font-size: 0.85em; }
+  .scene-header.open .scene-header-top::after { content: ' ▴'; }
+  .scene-roles {
+    display: none;
+    margin: 5px -11px -7px;
+    padding: 5px 11px 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 0 0 6px 6px;
+    font-size: 0.85em;
+    font-weight: normal;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.5;
+  }
+  .scene-header.open .scene-roles { display: block; }
   .line {
     margin: 6px 0;
     padding: 7px 10px;
@@ -242,7 +257,10 @@ const onlyLinesCheckbox = document.getElementById('onlyLines');
 const scriptEl = document.getElementById('script');
 const statsEl = document.getElementById('stats');
 
-const STORAGE_KEY = 'ordinary-miracle-source-v4';
+const STORAGE_KEY = 'ordinary-miracle-source-v5';
+const STORAGE_ROLES_KEY = 'ordinary-miracle-roles-v1';
+let sceneRolesMap = {};
+try { sceneRolesMap = JSON.parse(localStorage.getItem(STORAGE_ROLES_KEY) || '{}'); } catch(e) {}
 
 function findItalicClasses(doc) {
   const set = new Set();
@@ -327,6 +345,29 @@ function htmlToText(html) {
   return out.join('\n');
 }
 
+function extractSceneRoles(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const map = {};
+  for (const row of doc.querySelectorAll('tr')) {
+    const tdContent = row.querySelector('td.c28');
+    const tdRoles = row.querySelector('td.c23');
+    if (!tdContent || !tdRoles) continue;
+    const h2 = tdContent.querySelector('h2');
+    if (!h2) continue;
+    let label = h2.textContent.replace(/\u00A0/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    const sm = label.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
+    if (!sm) continue;
+    label = 'СЦЕНА ' + sm[1] + (sm[2] ? ' ' + sm[2] : '');
+    const roles = [];
+    for (const p of tdRoles.querySelectorAll('p')) {
+      const t = p.textContent.replace(/\u00A0/g, ' ').trim();
+      if (t) roles.push(t);
+    }
+    if (roles.length) map[label] = roles;
+  }
+  return map;
+}
+
 function looksLikeHtml(s) {
   const head = s.slice(0, 2000).toLowerCase();
   return /<\s*(!doctype html|html|body|head|p\b|div\b|table\b)/.test(head);
@@ -334,6 +375,10 @@ function looksLikeHtml(s) {
 
 function loadText(text) {
   const script = looksLikeHtml(text) ? htmlToText(text) : text;
+  if (looksLikeHtml(text)) {
+    sceneRolesMap = extractSceneRoles(text);
+    try { localStorage.setItem(STORAGE_ROLES_KEY, JSON.stringify(sceneRolesMap)); } catch(e) {}
+  }
   try { localStorage.setItem(STORAGE_KEY, script); } catch (e) {}
   parse(script);
   render();
@@ -412,7 +457,7 @@ function parse(text) {
       if (!started) { currentScene = label; continue; }
       currentScene = label;
       if (!scenes.includes(label)) scenes.push(label);
-      entries.push({ kind:'scene', text:label, scene:label });
+      entries.push({ kind:'scene', text:label, scene:label, roles: sceneRolesMap[label] || [] });
       continue;
     }
     if (s === 'СТОП' || /^_+$/.test(s)) { flush(); continue; }
@@ -425,7 +470,7 @@ function parse(text) {
         started = true;
         if (currentScene && !scenes.includes(currentScene)) {
           scenes.push(currentScene);
-          entries.push({ kind:'scene', text:currentScene, scene:currentScene });
+          entries.push({ kind:'scene', text:currentScene, scene:currentScene, roles: sceneRolesMap[currentScene] || [] });
         }
       }
       continue;
@@ -475,7 +520,21 @@ function render() {
       const h = document.createElement('div');
       h.className = 'scene-header';
       h.id = 'scene-' + sceneIdx;
-      h.textContent = e.text;
+      if (e.roles && e.roles.length) {
+        h.classList.add('has-roles');
+        if (!hidden) h.classList.add('open');
+        const top = document.createElement('div');
+        top.className = 'scene-header-top';
+        top.textContent = e.text;
+        const rolesDiv = document.createElement('div');
+        rolesDiv.className = 'scene-roles';
+        rolesDiv.textContent = e.roles.join(' · ');
+        h.appendChild(top);
+        h.appendChild(rolesDiv);
+        h.addEventListener('click', ev => { ev.stopPropagation(); h.classList.toggle('open'); });
+      } else {
+        h.textContent = e.text;
+      }
       scriptEl.appendChild(h);
       continue;
     }
