@@ -217,7 +217,7 @@
     <label for="search">Поиск:</label>
     <input type="search" id="search" placeholder="слова в тексте">
   </div>
-  <label class="toggle"><input type="checkbox" id="onlyLines"> Показывать только реплики</label>
+  <label class="toggle"><input type="checkbox" id="hideRemarks"> Скрыть примечания</label>
   <span class="stats" id="stats"></span>
 </div>
 
@@ -259,7 +259,7 @@ let rolesPresent = [];
 const roleSelect = document.getElementById('role');
 const sceneSelect = document.getElementById('scene');
 const searchInput = document.getElementById('search');
-const onlyLinesCheckbox = document.getElementById('onlyLines');
+const hideRemarksCheckbox = document.getElementById('hideRemarks');
 const scriptEl = document.getElementById('script');
 const statsEl = document.getElementById('stats');
 
@@ -539,12 +539,12 @@ function songifyLines(html) {
 function render() {
   const hidden = roleSelect.value;
   const term = searchInput.value.trim();
-  const onlyLines = onlyLinesCheckbox.checked;
+  const hideRemarks = hideRemarksCheckbox.checked;
   scriptEl.innerHTML = '';
   let sceneIdx = -1, total = 0, hiddenCount = 0;
 
   for (const e of entries) {
-    if (onlyLines && (e.kind === 'stage' || e.kind === 'music')) continue;
+    if (hideRemarks && (e.kind === 'stage' || e.kind === 'music')) continue;
     if (term && e.kind === 'line' && !e.text.toLowerCase().includes(term.toLowerCase()) && !(e.role || '').toLowerCase().includes(term.toLowerCase())) continue;
 
     if (e.kind === 'scene') {
@@ -624,7 +624,7 @@ function render() {
 
 roleSelect.addEventListener('change', () => { render(); updateActionBar(); });
 searchInput.addEventListener('input', render);
-onlyLinesCheckbox.addEventListener('change', render);
+hideRemarksCheckbox.addEventListener('change', render);
 sceneSelect.addEventListener('change', () => {
   const v = sceneSelect.value;
   if (!v) return;
