@@ -212,7 +212,7 @@
     <label for="search">Поиск:</label>
     <input type="search" id="search" placeholder="слова в тексте">
   </div>
-  <label class="toggle"><input type="checkbox" id="onlyLines"> только реплики</label>
+  <label class="toggle"><input type="checkbox" id="onlyLines"> Показывать только реплики</label>
   <span class="stats" id="stats"></span>
 </div>
 
@@ -227,9 +227,10 @@
 </div>
 
 <div class="action-bar" id="actionBar">
+  <button id="btnTop" title="В начало страницы">↑ Начало</button>
   <button id="btnHideAll" title="Снова скрыть все реплики">Скрыть все</button>
   <button id="btnShowAll" title="Показать все скрытые реплики">Показать все</button>
-  <button id="btnNext" title="Перейти к следующей скрытой реплике">Следующая →</button>
+  <button id="btnNext" title="Перейти к следующей реплике">Следующая ↓</button>
 </div>
 
 <script>
@@ -257,10 +258,8 @@ const onlyLinesCheckbox = document.getElementById('onlyLines');
 const scriptEl = document.getElementById('script');
 const statsEl = document.getElementById('stats');
 
-const STORAGE_KEY = 'ordinary-miracle-source-v5';
 const STORAGE_ROLES_KEY = 'ordinary-miracle-roles-v1';
 let sceneRolesMap = {};
-try { sceneRolesMap = JSON.parse(localStorage.getItem(STORAGE_ROLES_KEY) || '{}'); } catch(e) {}
 
 function findItalicClasses(doc) {
   const set = new Set();
@@ -377,9 +376,7 @@ function loadText(text) {
   const script = looksLikeHtml(text) ? htmlToText(text) : text;
   if (looksLikeHtml(text)) {
     sceneRolesMap = extractSceneRoles(text);
-    try { localStorage.setItem(STORAGE_ROLES_KEY, JSON.stringify(sceneRolesMap)); } catch(e) {}
   }
-  try { localStorage.setItem(STORAGE_KEY, script); } catch (e) {}
   parse(script);
   render();
 }
@@ -407,16 +404,10 @@ function bindLoader() {
   }
 }
 
-const cached = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } })();
-if (cached) {
-  parse(cached);
-  render();
-} else {
-  fetch('script.html').then(r => {
-    if (!r.ok) throw new Error('not found');
-    return r.text();
-  }).then(loadText).catch(() => { bindLoader(); });
-}
+fetch('script.html').then(r => {
+  if (!r.ok) throw new Error('not found');
+  return r.text();
+}).then(loadText).catch(() => { bindLoader(); });
 
 function normalizeRole(name) {
   const up = name.trim().toUpperCase().replace(/\s+/g, ' ');
@@ -574,7 +565,11 @@ function render() {
     textSpan.innerHTML = ' ' + italicizeParens(highlight(escapeHtml(e.text), term));
     body.appendChild(textSpan);
 
-    if (isHidden) div.addEventListener('click', () => div.classList.toggle('revealed'));
+    if (isHidden) div.addEventListener('click', () => {
+      const all = Array.from(scriptEl.querySelectorAll('.hidden-line'));
+      nextIdx = all.indexOf(div);
+      div.classList.toggle('revealed');
+    });
 
     div.appendChild(num);
     div.appendChild(body);
@@ -598,13 +593,21 @@ sceneSelect.addEventListener('change', () => {
 });
 
 const actionBar = document.getElementById('actionBar');
+const btnTop = document.getElementById('btnTop');
 const btnHideAll = document.getElementById('btnHideAll');
 const btnShowAll = document.getElementById('btnShowAll');
 const btnNext = document.getElementById('btnNext');
 
 function updateActionBar() {
-  actionBar.style.display = roleSelect.value ? 'flex' : 'none';
+  actionBar.style.display = 'flex';
+  const hasRole = !!roleSelect.value;
+  btnHideAll.style.display = hasRole ? '' : 'none';
+  btnShowAll.style.display = hasRole ? '' : 'none';
+  btnNext.style.display = hasRole ? '' : 'none';
 }
+updateActionBar();
+
+btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 btnHideAll.addEventListener('click', () => {
   scriptEl.querySelectorAll('.hidden-line.revealed').forEach(el => el.classList.remove('revealed'));
