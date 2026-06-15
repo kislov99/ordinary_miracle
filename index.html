@@ -76,6 +76,20 @@
     line-height: 1.5;
   }
   .scene-header.open .scene-roles { display: block; }
+  .act-header {
+    margin: 28px 0 8px;
+    padding: 6px 0;
+    color: #8a7a66;
+    font-weight: 500;
+    font-size: 0.9em;
+    letter-spacing: 0.25em;
+    text-align: center;
+    text-transform: uppercase;
+    border-top: 1px solid #d9cfc1;
+    border-bottom: 1px solid #d9cfc1;
+    background: transparent;
+    scroll-margin-top: 8px;
+  }
   .line {
     margin: 6px 0;
     padding: 7px 10px;
@@ -267,11 +281,13 @@ const KUPLETY_MAP = {
   'ТРАКТИРЩИКА': 'ТРАКТИРЩИК',
   'МИНИСТРА': 'МИНИСТР-АДМИНИСТРАТОР',
   'АДМИНИСТРАТОРА': 'МИНИСТР-АДМИНИСТРАТОР',
-  'ЖЕНЫ ВОЛШЕБНИКА': 'ЖЕНА ВОЛШЕБНИКА'
+  'ЖЕНЫ ВОЛШЕБНИКА': 'ЖЕНА ВОЛШЕБНИКА',
+  'ХОЗЯИНА': 'ВОЛШЕБНИК',
+  'ХОЗЯИН': 'ВОЛШЕБНИК'
 };
 function detectKupletyRole(s) {
-  const m = s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40}?)(?:\s+\d+)?\s*$/iu)
-         || s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40})/iu);
+  const m = s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль|Монолог)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40}?)(?:\s+\d+)?\s*$/iu)
+         || s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль|Монолог)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40})/iu);
   if (!m) return null;
   const name = m[1].trim().toUpperCase().replace(/\s+/g, ' ');
   if (KUPLETY_MAP[name]) return KUPLETY_MAP[name];
@@ -392,7 +408,9 @@ function htmlToText(html) {
   for (const el of blocks) {
     if (el.querySelector('p, h1, h2, h3, h4, li')) continue;
     const ancestorTd = el.closest('td');
-    if (ancestorTd && !ancestorTd.querySelector('h2')) continue;
+    if (ancestorTd && !ancestorTd.querySelector('h2, h1')) continue;
+    const onlyAnchor = el.querySelector('a[href^="#"]');
+    if (onlyAnchor) continue;
     const fullyItalic = isItalicBlock(el, italicClasses);
     const isSong = !fullyItalic && isSongBlock(el, songClasses);
     const raw = fullyItalic ? el.textContent : extractInlineText(el, italicClasses);
@@ -409,7 +427,7 @@ function htmlToText(html) {
       prevBlank = true;
       continue;
     }
-    out.push(isSong ? '\x01' + t : t);
+    out.push(isSong ? '\x01' + t : (el.tagName === 'H1' ? '\x02' + t : t));
     prevBlank = false;
   }
   return out.join('\n');
@@ -494,6 +512,16 @@ function normalizeRole(name) {
   const up = name.trim().toUpperCase().replace(/\s+/g, ' ');
   return ALIASES[up] || (KNOWN_ROLES.includes(up) ? up : up);
 }
+function detectAct(s) {
+  if (s.charCodeAt(0) !== 2) return null;
+  const compact = s.slice(1).replace(/\s+/g, '').toUpperCase();
+  if (/^КОНЕЦ/.test(compact)) return null;
+  let m = compact.match(/^ДЕЙСТВИЕ(\d+)$/);
+  if (m) return 'ДЕЙСТВИЕ ' + m[1];
+  m = compact.match(/^(\d+)ДЕЙСТВИЕ$/);
+  if (m) return 'ДЕЙСТВИЕ ' + m[1];
+  return null;
+}
 function isRoleLineStart(s) {
   const m = s.match(/^([А-ЯЁ][А-ЯЁ \-]{1,40}?)[.:]\s*(.*)$/);
   if (m) {
@@ -570,6 +598,14 @@ function parse(text) {
       }
       continue;
     }
+    const actLabel = detectAct(s);
+    if (actLabel) {
+      flush();
+      abandonPending();
+      entries.push({ kind:'act', text: actLabel });
+      continue;
+    }
+    if (s.charCodeAt(0) === 2) s = s.slice(1);
     const sm = s.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
     if (sm) {
       flush();
@@ -674,6 +710,13 @@ function render() {
     if (hideRemarks && (e.kind === 'stage' || e.kind === 'music')) continue;
     if (term && e.kind === 'line' && !e.text.toLowerCase().includes(term.toLowerCase()) && !(e.role || '').toLowerCase().includes(term.toLowerCase())) continue;
 
+    if (e.kind === 'act') {
+      const a = document.createElement('div');
+      a.className = 'act-header';
+      a.textContent = e.text;
+      scriptEl.appendChild(a);
+      continue;
+    }
     if (e.kind === 'scene') {
       sceneIdx++;
       const h = document.createElement('div');
