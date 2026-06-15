@@ -251,6 +251,49 @@ const ALIASES = {
   'МИНИСТР': 'МИНИСТР-АДМИНИСТРАТОР',
   'АДМИНИСТРАТОР': 'МИНИСТР-АДМИНИСТРАТОР'
 };
+const KUPLETY_MAP = {
+  'КОРОЛЯ': 'КОРОЛЬ',
+  'ВОЛШЕБНИКА': 'ВОЛШЕБНИК',
+  'МЕДВЕДЯ': 'МЕДВЕДЬ',
+  'ПРИНЦЕССЫ': 'ПРИНЦЕССА',
+  'ЭМИЛИИ': 'ЭМИЛИЯ',
+  'АМАНДЫ': 'АМАНДА',
+  'ОРИНТИИ': 'ОРИНТИЯ',
+  'ЭМИЛЯ': 'ЭМИЛЬ',
+  'ОХОТНИКА': 'ОХОТНИК',
+  'УЧЕНИКА': 'УЧЕНИК',
+  'ПАЛАЧА': 'ПАЛАЧ',
+  'ХОРА': 'ХОР',
+  'ТРАКТИРЩИКА': 'ТРАКТИРЩИК',
+  'МИНИСТРА': 'МИНИСТР-АДМИНИСТРАТОР',
+  'АДМИНИСТРАТОРА': 'МИНИСТР-АДМИНИСТРАТОР',
+  'ЖЕНЫ ВОЛШЕБНИКА': 'ЖЕНА ВОЛШЕБНИКА'
+};
+function detectKupletyRole(s) {
+  const m = s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40}?)(?:\s+\d+)?\s*$/iu)
+         || s.match(/(?:Куплет(?:ы|а|ов)?|Зонг|Песня|Ария|Дуэт|Дуэль)[\s»«"'-]+([А-ЯЁа-яё][А-ЯЁа-яё \-]{2,40})/iu);
+  if (!m) return null;
+  const name = m[1].trim().toUpperCase().replace(/\s+/g, ' ');
+  if (KUPLETY_MAP[name]) return KUPLETY_MAP[name];
+  const first = name.split(' ')[0];
+  if (KUPLETY_MAP[first]) return KUPLETY_MAP[first];
+  if (KNOWN_ROLES.includes(name)) return name;
+  if (ALIASES[name]) return ALIASES[name];
+  return null;
+}
+function resolveAbbrevRole(letters, scene) {
+  if (!scene || !sceneRolesMap[scene]) return null;
+  const prefix = letters.toUpperCase();
+  const candidates = [];
+  for (const r of sceneRolesMap[scene]) {
+    const up = r.toUpperCase().replace(/\s+/g, ' ').trim();
+    if (up.startsWith(prefix)) {
+      const norm = normalizeRole(up);
+      if (!candidates.includes(norm)) candidates.push(norm);
+    }
+  }
+  return candidates.length === 1 ? candidates[0] : null;
+}
 
 let entries = [];
 let scenes = [];
@@ -348,11 +391,12 @@ function htmlToText(html) {
   let prevBlank = true;
   for (const el of blocks) {
     if (el.querySelector('p, h1, h2, h3, h4, li')) continue;
-    if (el.closest('td.c2, td.c23')) continue;
+    const ancestorTd = el.closest('td');
+    if (ancestorTd && !ancestorTd.querySelector('h2')) continue;
     const fullyItalic = isItalicBlock(el, italicClasses);
     const isSong = !fullyItalic && isSongBlock(el, songClasses);
     const raw = fullyItalic ? el.textContent : extractInlineText(el, italicClasses);
-    let t = raw.replace(/\u00A0/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    let t = raw.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
     if (!t) {
       if (!prevBlank) { out.push(''); prevBlank = true; }
       continue;
@@ -375,18 +419,28 @@ function extractSceneRoles(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const map = {};
   for (const row of doc.querySelectorAll('tr')) {
-    const tdContent = row.querySelector('td.c28');
-    const tdRoles = row.querySelector('td.c23');
-    if (!tdContent || !tdRoles) continue;
+    const tds = row.querySelectorAll('td');
+    if (tds.length < 2) continue;
+    let tdContent = null;
+    for (const td of tds) {
+      if (td.querySelector('h2')) { tdContent = td; break; }
+    }
+    if (!tdContent) continue;
+    let tdRoles = null;
+    for (let i = tds.length - 1; i >= 0; i--) {
+      const td = tds[i];
+      if (td === tdContent) continue;
+      if (td.querySelector('p')) { tdRoles = td; break; }
+    }
+    if (!tdRoles) continue;
     const h2 = tdContent.querySelector('h2');
-    if (!h2) continue;
-    let label = h2.textContent.replace(/\u00A0/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    let label = h2.textContent.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
     const sm = label.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
     if (!sm) continue;
     label = 'СЦЕНА ' + sm[1] + (sm[2] ? ' ' + sm[2] : '');
     const roles = [];
     for (const p of tdRoles.querySelectorAll('p')) {
-      const t = p.textContent.replace(/\u00A0/g, ' ').trim();
+      const t = p.textContent.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
       if (t) roles.push(t);
     }
     if (roles.length) map[label] = roles;
@@ -464,6 +518,24 @@ function parse(text) {
   const rolesSet = new Set();
   const rawLines = text.split(/\r?\n/);
   let started = false, currentScene = null, currentSpeaker = null, buffer = [];
+  let songSpeaker = null;
+  let pendingOrphans = [];
+  let seenRolesInScene = new Set();
+
+  function resolveAbbrev(letters) {
+    const prefix = letters.toUpperCase();
+    const candidates = new Set();
+    if (currentScene && sceneRolesMap[currentScene]) {
+      for (const r of sceneRolesMap[currentScene]) {
+        const up = r.toUpperCase().replace(/\s+/g, ' ').trim();
+        if (up.startsWith(prefix)) candidates.add(normalizeRole(up));
+      }
+    }
+    for (const r of seenRolesInScene) {
+      if (r.startsWith(prefix)) candidates.add(r);
+    }
+    return candidates.size === 1 ? [...candidates][0] : null;
+  }
 
   function flush() {
     if (currentSpeaker && buffer.length) {
@@ -472,16 +544,38 @@ function parse(text) {
     }
     buffer = []; currentSpeaker = null;
   }
+  function flushPendingTo(role) {
+    if (!role || !pendingOrphans.length) return;
+    const body = pendingOrphans.map(l => '\x01' + l).join('\n');
+    entries.push({ kind:'line', role, text:body, scene:currentScene });
+    rolesSet.add(role);
+    pendingOrphans = [];
+  }
+  function abandonPending() {
+    for (const l of pendingOrphans) entries.push({ kind:'stage', text:l, scene:currentScene, song:true });
+    pendingOrphans = [];
+  }
 
   for (let raw of rawLines) {
     let s = raw.replace(/\t/g, ' ').trim();
     const isSongLine = s.startsWith('\x01');
     if (isSongLine) s = s.slice(1);
     if (!s) { flush(); continue; }
-    if (/^[🎵🎶]/.test(s)) { flush(); if (started) entries.push({ kind:'music', text:s, scene:currentScene }); continue; }
+    if (/^[🎵🎶]/.test(s)) {
+      flush();
+      if (started) {
+        entries.push({ kind:'music', text:s, scene:currentScene });
+        const kuplet = detectKupletyRole(s);
+        if (kuplet) { songSpeaker = kuplet; flushPendingTo(songSpeaker); }
+      }
+      continue;
+    }
     const sm = s.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
     if (sm) {
       flush();
+      abandonPending();
+      songSpeaker = null;
+      seenRolesInScene = new Set();
       const label = 'СЦЕНА ' + sm[1] + (sm[2] ? ' ' + sm[2] : '');
       if (!started) { currentScene = label; continue; }
       currentScene = label;
@@ -490,10 +584,22 @@ function parse(text) {
       continue;
     }
     if (s === 'СТОП' || /^_+$/.test(s)) { flush(); continue; }
-    const rl = isRoleLineStart(s);
+    let rl = isRoleLineStart(s);
+    if (!rl) {
+      const am = s.match(/^([А-ЯЁ]{1,2})[.:]\s*(.+)$/);
+      if (am) {
+        const role = resolveAbbrev(am[1]);
+        if (role) rl = { role, rest: am[2] };
+      }
+    }
     if (rl) {
       flush();
       currentSpeaker = rl.role;
+      seenRolesInScene.add(rl.role);
+      if (isSongLine) {
+        songSpeaker = rl.role;
+        flushPendingTo(songSpeaker);
+      }
       if (rl.rest) buffer.push(isSongLine ? '\x01' + rl.rest : rl.rest);
       if (!started) {
         started = true;
@@ -505,14 +611,35 @@ function parse(text) {
       continue;
     }
     if (!started) continue;
+    const isStage = s.startsWith('(') && s.endsWith(')');
+    if (isStage) {
+      const kuplet = detectKupletyRole(s);
+      if (kuplet) {
+        songSpeaker = kuplet;
+        flushPendingTo(songSpeaker);
+      }
+    }
     if (currentSpeaker) {
-      if (s.startsWith('(') && s.endsWith(')')) {
+      if (isStage) {
         flush();
         entries.push({ kind:'stage', text:s, scene:currentScene });
-      } else buffer.push(isSongLine ? '\x01' + s : s);
-    } else entries.push({ kind:'stage', text:s, scene:currentScene, song: isSongLine });
+      } else {
+        if (isSongLine && !songSpeaker) songSpeaker = currentSpeaker;
+        buffer.push(isSongLine ? '\x01' + s : s);
+      }
+    } else if (isSongLine) {
+      if (songSpeaker) {
+        currentSpeaker = songSpeaker;
+        buffer.push('\x01' + s);
+      } else {
+        pendingOrphans.push(s);
+      }
+    } else {
+      entries.push({ kind:'stage', text:s, scene:currentScene });
+    }
   }
   flush();
+  abandonPending();
 
   rolesPresent = Array.from(rolesSet).sort();
   roleSelect.innerHTML = '<option value="">— все —</option>' +
