@@ -902,10 +902,12 @@ btnGoto.addEventListener('click', () => {
 
 window.addEventListener('scroll', () => {
   if (btnGoto.style.display === 'none' || !btnGoto.dataset.entryIdx) return;
+  if (!searchInput.value.trim()) { btnGoto.style.display = 'none'; return; }
   const sel = scriptEl.querySelector('.line.search-selected');
   if (sel) showGotoButton(sel);
 });
 window.addEventListener('resize', () => {
+  if (!searchInput.value.trim()) return;
   const sel = scriptEl.querySelector('.line.search-selected');
   if (sel) showGotoButton(sel);
 });
@@ -941,6 +943,15 @@ function updateActionBar() {
   btnHideAll.style.display = hasRole ? '' : 'none';
   btnShowAll.style.display = hasRole ? '' : 'none';
   btnNext.style.display = hasRole ? '' : 'none';
+  if (hasRole) {
+    actionBar.style.left = '';
+    actionBar.style.right = '';
+    actionBar.style.transform = '';
+  } else {
+    actionBar.style.right = 'auto';
+    actionBar.style.left = '50%';
+    actionBar.style.transform = 'translateX(-50%)';
+  }
 }
 updateActionBar();
 
