@@ -46,7 +46,25 @@
     min-width: 0;
     max-width: 100%;
   }
-  .hint { color: #777; font-size: 0.82em; font-style: italic; margin: 0 0 12px; padding: 0 4px; }
+  .hint { color: #777; font-size: 0.82em; font-style: italic; margin: 0; padding: 0 4px; }
+  .role-stack { display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; min-width: 0; }
+  .role-stack .group { flex: 0 0 auto; }
+  #btnGoto {
+    position: absolute;
+    padding: 4px 10px;
+    font-size: 0.85em;
+    font-family: inherit;
+    background: #6b4423;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    z-index: 50;
+  }
+  #btnGoto:hover { background: #8a5a30; }
+  .line.search-selected { box-shadow: 0 0 0 2px #6b4423; }
   .stats { font-size: 0.8em; color: #777; flex-basis: 100%; }
   .controls .toggle { display: flex; align-items: center; gap: 5px; font-size: 0.9em; cursor: pointer; }
   .controls .toggle input { cursor: pointer; }
@@ -219,9 +237,16 @@
 <h1>Обыкновенное чудо — разучивание реплик</h1>
 
 <div class="controls">
-  <div class="group">
-    <label for="role">Роль:</label>
-    <select id="role"><option value="">— все —</option></select>
+  <div class="role-stack">
+    <div class="group">
+      <label for="role">Роль:</label>
+      <select id="role"><option value="">— все —</option></select>
+    </div>
+    <p class="hint" id="roleHint" style="display:none">Кликните по скрытой реплике, чтобы её показать.</p>
+    <div class="group">
+      <label for="act">Действие:</label>
+      <select id="act"><option value="">↧ перейти —</option></select>
+    </div>
   </div>
   <div class="group">
     <label for="scene">Сцена:</label>
@@ -235,8 +260,6 @@
   <span class="stats" id="stats"></span>
 </div>
 
-<p class="hint">Кликните по жёлтой (скрытой) реплике, чтобы её показать.</p>
-
 <div id="script">
   <div class="empty-msg" id="loader">
     <strong>Загрузите файл сценария</strong>
@@ -244,6 +267,8 @@
     <label class="filebtn">Выбрать файл<input type="file" id="fileInput" accept=".html,.htm,.txt,text/html,text/plain" style="display:none"></label>
   </div>
 </div>
+
+<button id="btnGoto" type="button" style="display:none">Перейти</button>
 
 <div class="action-bar" id="actionBar">
   <button id="btnTop" title="В начало страницы">↑ Начало</button>
@@ -313,14 +338,19 @@ function resolveAbbrevRole(letters, scene) {
 
 let entries = [];
 let scenes = [];
+let acts = [];
 let rolesPresent = [];
+let selectedEntryIdx = null;
 
 const roleSelect = document.getElementById('role');
 const sceneSelect = document.getElementById('scene');
+const actSelect = document.getElementById('act');
 const searchInput = document.getElementById('search');
 const hideRemarksCheckbox = document.getElementById('hideRemarks');
 const scriptEl = document.getElementById('script');
 const statsEl = document.getElementById('stats');
+const roleHint = document.getElementById('roleHint');
+const btnGoto = document.getElementById('btnGoto');
 
 const STORAGE_ROLES_KEY = 'ordinary-miracle-roles-v1';
 let sceneRolesMap = {};
@@ -542,7 +572,7 @@ function isRoleLineStart(s) {
 }
 
 function parse(text) {
-  entries = []; scenes = [];
+  entries = []; scenes = []; acts = [];
   const rolesSet = new Set();
   const rawLines = text.split(/\r?\n/);
   let started = false, currentScene = null, currentSpeaker = null, buffer = [];
@@ -603,6 +633,7 @@ function parse(text) {
       flush();
       abandonPending();
       entries.push({ kind:'act', text: actLabel });
+      if (!acts.includes(actLabel)) acts.push(actLabel);
       continue;
     }
     if (s.charCodeAt(0) === 2) s = s.slice(1);
@@ -682,6 +713,8 @@ function parse(text) {
     rolesPresent.map(r => `<option value="${r}">${r}</option>`).join('');
   sceneSelect.innerHTML = '<option value="">↧ перейти —</option>' +
     scenes.map((s, i) => `<option value="scene-${i}">${s.replace(/^СЦЕНА\s+/, '')}</option>`).join('');
+  actSelect.innerHTML = '<option value="">↧ перейти —</option>' +
+    acts.map((a, i) => `<option value="act-${i}">${a}</option>`).join('');
 }
 
 function highlight(text, term) {
@@ -703,22 +736,42 @@ function render() {
   const hidden = roleSelect.value;
   const term = searchInput.value.trim();
   const hideRemarks = hideRemarksCheckbox.checked;
+  if (typeof btnGoto !== 'undefined' && btnGoto) {
+    btnGoto.style.display = 'none';
+    delete btnGoto.dataset.entryIdx;
+  }
   scriptEl.innerHTML = '';
   let sceneIdx = -1, total = 0, hiddenCount = 0;
 
+  const scenesWithMatches = new Set();
+  if (term) {
+    const lc = term.toLowerCase();
+    for (const e of entries) {
+      if (e.kind === 'line' && (e.text.toLowerCase().includes(lc) || (e.role || '').toLowerCase().includes(lc))) {
+        if (e.scene) scenesWithMatches.add(e.scene);
+      }
+    }
+  }
+
   for (const e of entries) {
     if (hideRemarks && (e.kind === 'stage' || e.kind === 'music')) continue;
+    if (term && e.kind === 'stage') continue;
+    if (term && e.kind === 'music') continue;
+    if (term && e.kind === 'act') continue;
     if (term && e.kind === 'line' && !e.text.toLowerCase().includes(term.toLowerCase()) && !(e.role || '').toLowerCase().includes(term.toLowerCase())) continue;
 
     if (e.kind === 'act') {
       const a = document.createElement('div');
       a.className = 'act-header';
+      const actIdx = acts.indexOf(e.text);
+      if (actIdx >= 0) a.id = 'act-' + actIdx;
       a.textContent = e.text;
       scriptEl.appendChild(a);
       continue;
     }
     if (e.kind === 'scene') {
       sceneIdx++;
+      if (term && !scenesWithMatches.has(e.text)) continue;
       const h = document.createElement('div');
       h.className = 'scene-header';
       h.id = 'scene-' + sceneIdx;
@@ -757,7 +810,8 @@ function render() {
     total++;
     const div = document.createElement('div');
     div.className = 'line';
-    const isHidden = hidden && e.role === hidden;
+    div.dataset.entryIdx = entries.indexOf(e);
+    const isHidden = hidden && e.role === hidden && !term;
     if (isHidden) { div.classList.add('hidden-line'); hiddenCount++; }
 
     const num = document.createElement('div');
@@ -782,6 +836,14 @@ function render() {
       div.classList.toggle('revealed');
     });
 
+    div.addEventListener('click', (ev) => {
+      if (ev.target.closest('#btnGoto')) return;
+      scriptEl.querySelectorAll('.line.search-selected').forEach(el => el.classList.remove('search-selected'));
+      div.classList.add('search-selected');
+      selectedEntryIdx = div.dataset.entryIdx;
+      if (term) showGotoButton(div);
+      else { btnGoto.style.display = 'none'; delete btnGoto.dataset.entryIdx; }
+    });
     div.appendChild(num);
     div.appendChild(body);
     scriptEl.appendChild(div);
@@ -790,10 +852,63 @@ function render() {
   statsEl.textContent = hidden
     ? `${hidden}: ${hiddenCount} скрыто из ${total}`
     : `Всего реплик: ${total}`;
+
+  if (selectedEntryIdx != null) {
+    const sel = scriptEl.querySelector(`.line[data-entry-idx="${selectedEntryIdx}"]`);
+    if (sel) sel.classList.add('search-selected');
+  }
 }
 
-roleSelect.addEventListener('change', () => { render(); updateActionBar(); });
-searchInput.addEventListener('input', render);
+roleSelect.addEventListener('change', () => { render(); updateActionBar(); updateHint(); });
+searchInput.addEventListener('input', () => {
+  hideGotoButton();
+  render();
+});
+
+function showGotoButton(lineEl) {
+  btnGoto.dataset.entryIdx = lineEl.dataset.entryIdx;
+  btnGoto.style.display = '';
+  const rect = lineEl.getBoundingClientRect();
+  const btnW = btnGoto.offsetWidth || 80;
+  const scrollY = window.scrollY || window.pageYOffset;
+  const scrollX = window.scrollX || window.pageXOffset;
+  let left = rect.right + scrollX + 8;
+  if (left + btnW > scrollX + document.documentElement.clientWidth - 4) {
+    left = rect.right + scrollX - btnW - 8;
+  }
+  const top = rect.top + scrollY + (rect.height - btnGoto.offsetHeight) / 2;
+  btnGoto.style.left = left + 'px';
+  btnGoto.style.top = top + 'px';
+}
+
+function hideGotoButton() {
+  btnGoto.style.display = 'none';
+  delete btnGoto.dataset.entryIdx;
+  scriptEl.querySelectorAll('.line.search-selected').forEach(el => el.classList.remove('search-selected'));
+}
+
+btnGoto.addEventListener('click', () => {
+  const preserveIdx = btnGoto.dataset.entryIdx;
+  selectedEntryIdx = preserveIdx;
+  searchInput.value = '';
+  btnGoto.style.display = 'none';
+  delete btnGoto.dataset.entryIdx;
+  render();
+  if (preserveIdx != null) {
+    const target = scriptEl.querySelector(`.line[data-entry-idx="${preserveIdx}"]`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+window.addEventListener('scroll', () => {
+  if (btnGoto.style.display === 'none' || !btnGoto.dataset.entryIdx) return;
+  const sel = scriptEl.querySelector('.line.search-selected');
+  if (sel) showGotoButton(sel);
+});
+window.addEventListener('resize', () => {
+  const sel = scriptEl.querySelector('.line.search-selected');
+  if (sel) showGotoButton(sel);
+});
 hideRemarksCheckbox.addEventListener('change', render);
 sceneSelect.addEventListener('change', () => {
   const v = sceneSelect.value;
@@ -802,6 +917,17 @@ sceneSelect.addEventListener('change', () => {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   sceneSelect.value = '';
 });
+actSelect.addEventListener('change', () => {
+  const v = actSelect.value;
+  if (!v) return;
+  const el = document.getElementById(v);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  actSelect.value = '';
+});
+
+function updateHint() {
+  roleHint.style.display = roleSelect.value ? '' : 'none';
+}
 
 const actionBar = document.getElementById('actionBar');
 const btnTop = document.getElementById('btnTop');
