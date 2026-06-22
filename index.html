@@ -230,6 +230,10 @@
     .action-bar { bottom: 6px; right: 6px; padding: 5px 6px; }
     .action-bar button { padding: 6px 8px; font-size: 0.82em; }
   }
+
+  @media print {
+    .controls, .action-bar, #btnGoto { display: none !important; }
+  }
 </style>
 </head>
 <body>
