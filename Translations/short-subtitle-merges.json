@@ -1,0 +1,514 @@
+[
+  {
+    "start_row": 21,
+    "end_row": 22,
+    "ru": "Мы словно эхо ваших слов, Мы словно пенье ваших струн.",
+    "en": "We are the echo of your words, We are the music of your strings.",
+    "kind": "continuation",
+    "reason": "Parallel lyric clauses form one complete thought."
+  },
+  {
+    "start_row": 62,
+    "end_row": 63,
+    "ru": "И вдруг хлоп! Гром, молния, чудеса, превращения!",
+    "en": "Then suddenly, bang! Thunder, lightning, miracles, transformations!",
+    "kind": "same-speaker",
+    "reason": "The short exclamation immediately introduces the list."
+  },
+  {
+    "start_row": 74,
+    "end_row": 75,
+    "ru": "И семь раз молнией их ударил! Все напрасно.",
+    "en": "I struck them with lightning seven times! All to no avail.",
+    "kind": "same-speaker",
+    "reason": "The brief conclusion completes the preceding boast."
+  },
+  {
+    "start_row": 167,
+    "end_row": 168,
+    "ru": "Я сделал так, что один из королей вдруг",
+    "en": "I arranged it so that one of the kings was suddenly seized",
+    "kind": "continuation",
+    "reason": "The second row is the grammatical continuation of the first."
+  },
+  {
+    "start_row": 292,
+    "end_row": 293,
+    "ru": "и на рассвете мы уже мчались по дороге всё дальше и дальше,",
+    "en": "and by dawn we were racing down the road, farther and farther,",
+    "kind": "continuation",
+    "reason": "A preposition and its phrase were split across rows."
+  },
+  {
+    "start_row": 350,
+    "end_row": 351,
+    "ru": "Я совсем не понимаю, Отчего мне так тепло?",
+    "en": "I cannot understand why I feel so warm.",
+    "kind": "continuation",
+    "reason": "The question completes the preceding governing clause."
+  },
+  {
+    "start_row": 357,
+    "end_row": 358,
+    "ru": "Удивительная слабость, Беспокойство, беззащитность.",
+    "en": "A strange and wondrous weakness, restlessness and helplessness.",
+    "kind": "continuation",
+    "reason": "The rows are parts of one compact descriptive list."
+  },
+  {
+    "start_row": 384,
+    "end_row": 385,
+    "ru": "Влюбится, влюбится! Смотри, какой он славный, симпатичный.",
+    "en": "She will, she will! Look how sweet and handsome he is.",
+    "kind": "same-speaker",
+    "reason": "The second short sentence directly supports the first."
+  },
+  {
+    "start_row": 484,
+    "end_row": 485,
+    "ru": "а у нас... НИЧЕГО! Ничего...",
+    "en": "while we have... NOTHING! Nothing...",
+    "kind": "continuation",
+    "reason": "The emphatic answer completes the unfinished contrast."
+  },
+  {
+    "start_row": 538,
+    "end_row": 539,
+    "ru": "И повсюду, тем более, здесь, Где природа дика и невинна.",
+    "en": "Anywhere, but especially here, where nature is wild and innocent.",
+    "kind": "continuation",
+    "reason": "The adjective phrase completes one lyric sentence."
+  },
+  {
+    "start_row": 549,
+    "end_row": 550,
+    "ru": "Зубки - жемчуг, а губки - коралл, Хороши также грудь и улыбка.",
+    "en": "Teeth like pearls and lips like coral, And a lovely bosom and smile.",
+    "kind": "continuation",
+    "reason": "The adjacent lyric lines form one descriptive list."
+  },
+  {
+    "start_row": 557,
+    "end_row": 558,
+    "ru": "— Ну, так как? Придёте?\n— Ха-ха-ха... И не подумаю.",
+    "en": "— Well? Will you come?\n— Ha-ha-ha... Not a chance.",
+    "kind": "dialogue",
+    "reason": "A compact question and immediate answer fit one line each."
+  },
+  {
+    "start_row": 563,
+    "end_row": 564,
+    "ru": "Прошу дать возможность загладить, искупить... всё!",
+    "en": "Please allow me to make amends, to atone for... everything!",
+    "kind": "continuation",
+    "reason": "The infinitive continuation completes one sentence."
+  },
+  {
+    "start_row": 605,
+    "end_row": 606,
+    "ru": "Значит, и мне тоже!",
+    "en": "Which means I like him too!",
+    "kind": "continuation",
+    "reason": "The second row completes the short inference."
+  },
+  {
+    "start_row": 622,
+    "end_row": 623,
+    "ru": "И я желаю, как и он, Гулять, шуметь и прыгать!",
+    "en": "And just like him, I long To carouse and shout and leap!",
+    "kind": "continuation",
+    "reason": "The infinitive list completes the lyric sentence."
+  },
+  {
+    "start_row": 657,
+    "end_row": 658,
+    "ru": "Пейте, а иначе, Пойте, а иначе, А иначе - голову долой!",
+    "en": "Drink, or else! Sing, or else! Or else—off with your head!",
+    "kind": "continuation",
+    "reason": "The refrain's consequence completes the repeated setup."
+  },
+  {
+    "start_row": 673,
+    "end_row": 674,
+    "ru": "И мне кажется, это удалось. Нет? Вы всё ещё сердитесь на меня.",
+    "en": "And I think I succeeded. No? You're still angry with me.",
+    "kind": "same-speaker",
+    "reason": "The short follow-up immediately tests the same thought."
+  },
+  {
+    "start_row": 676,
+    "end_row": 677,
+    "ru": "Ну, хотите... хотите я вас поцелую?",
+    "en": "Would you like... would you like me to kiss you?",
+    "kind": "continuation",
+    "reason": "A deliberately hesitant question was split mid-sentence."
+  },
+  {
+    "start_row": 713,
+    "end_row": 714,
+    "ru": "Много-много лет назад, государь, я стояла у окна,",
+    "en": "Many, many years ago, Your Majesty, I stood at a window,",
+    "kind": "continuation",
+    "reason": "The second row continues the same narrative clause."
+  },
+  {
+    "start_row": 728,
+    "end_row": 729,
+    "ru": "Вот жива. Здорова. Верно служу Вашему Величеству.",
+    "en": "And here I am. Alive and well. Faithfully serving Your Majesty.",
+    "kind": "same-speaker",
+    "reason": "The brief sentences are one immediate status report."
+  },
+  {
+    "start_row": 736,
+    "end_row": 737,
+    "ru": "доказавшего практичность, знание жизни, состоящего при короле!",
+    "en": "of proven practicality and worldly wisdom, a man in the King's service!",
+    "kind": "continuation",
+    "reason": "The second descriptor completes the noun phrase."
+  },
+  {
+    "start_row": 738,
+    "end_row": 739,
+    "ru": "— Вы говорите о Палаче?\n— Что Вы, Ваше Величество!",
+    "en": "— You mean the Executioner?\n— Good heavens, Your Majesty!",
+    "kind": "dialogue",
+    "reason": "A short question and immediate denial fit one line each."
+  },
+  {
+    "start_row": 756,
+    "end_row": 757,
+    "ru": "Клянусь, я убью каждого, кто последует за мной! И запомните это, все!",
+    "en": "I swear I'll kill anyone who follows me! Let everyone remember that!",
+    "kind": "same-speaker",
+    "reason": "The warning and its reinforcement are one immediate thought."
+  },
+  {
+    "start_row": 778,
+    "end_row": 780,
+    "ru": "Всех паразитов предупреждаю Поубиваю! Поубиваю! Всех казню! Лично!",
+    "en": "you parasites: I'll kill you! I'll kill you! I'll execute you all! Personally!",
+    "kind": "same-speaker",
+    "reason": "Three short escalating statements form one comic threat."
+  },
+  {
+    "start_row": 791,
+    "end_row": 792,
+    "ru": "Во всем опасный перепад, Сегодня рай, а завтра – ад",
+    "en": "Every turn is perilous: today is heaven, tomorrow—hell.",
+    "kind": "continuation",
+    "reason": "The contrast is one lyric sentence split across rows."
+  },
+  {
+    "start_row": 831,
+    "end_row": 832,
+    "ru": "Охотники охотятся повсюду. Зовите! Ну?!",
+    "en": "Hunters roam everywhere. Fetch him! Well?!",
+    "kind": "same-speaker",
+    "reason": "The observation immediately motivates the short command."
+  },
+  {
+    "start_row": 842,
+    "end_row": 843,
+    "ru": "Подождите, Ваше Величество, в такую ночь Вы все равно никого не разыщите,",
+    "en": "Wait, Your Majesty. On a night like this you'll never find anyone,",
+    "kind": "continuation",
+    "reason": "The address and warning belong to one sentence."
+  },
+  {
+    "start_row": 849,
+    "end_row": 850,
+    "ru": "— А что я там буду делать?\n— Ходить из угла в угол.",
+    "en": "— And what am I to do there?\n— Pace up and down.",
+    "kind": "dialogue",
+    "reason": "A compact question and answer fit one line each."
+  },
+  {
+    "start_row": 872,
+    "end_row": 873,
+    "ru": "— Где мой новый ученик?\n— Ружьё чистит.",
+    "en": "— Where is my new apprentice?\n— Cleaning the gun.",
+    "kind": "dialogue",
+    "reason": "A compact question and answer fit one line each."
+  },
+  {
+    "start_row": 886,
+    "end_row": 887,
+    "ru": "— А почему с таким ужасом?\n— Потому что я не люблю охотников.",
+    "en": "— Why say it with such horror?\n— Because I can't stand hunters.",
+    "kind": "dialogue",
+    "reason": "The short answer directly explains the preceding question."
+  },
+  {
+    "start_row": 911,
+    "end_row": 912,
+    "ru": "На недругов злобных моих Смотрю я с презрением во взоре.",
+    "en": "Upon my wicked foes I cast a scornful eye.",
+    "kind": "continuation",
+    "reason": "The predicate completes the lyric sentence."
+  },
+  {
+    "start_row": 923,
+    "end_row": 924,
+    "ru": "400 коз, 300 волков и 99 медведей.",
+    "en": "four hundred goats, three hundred wolves, and ninety-nine bears.",
+    "kind": "continuation",
+    "reason": "The adjacent rows are one compact enumerated list."
+  },
+  {
+    "start_row": 974,
+    "end_row": 975,
+    "ru": "Вы так крепко полюбили, что решили в тот же час бросить всё",
+    "en": "You fell so deeply in love that there and then you left it all",
+    "kind": "continuation",
+    "reason": "The subordinate clause continues the question's setup."
+  },
+  {
+    "start_row": 1049,
+    "end_row": 1050,
+    "ru": "Хотя, какого дьявола! Смотрите.",
+    "en": "Still, why the devil not! Look at me.",
+    "kind": "same-speaker",
+    "reason": "The short command immediately follows the decision."
+  },
+  {
+    "start_row": 1117,
+    "end_row": 1118,
+    "ru": "в ружьё! Надо что-то немедленно предпринять!",
+    "en": "To arms! We must do something at once!",
+    "kind": "same-speaker",
+    "reason": "The rallying cry and urgent explanation form one thought."
+  },
+  {
+    "start_row": 1160,
+    "end_row": 1161,
+    "ru": "Дескать учил королевскую дочь благородному искусству охоты, а?",
+    "en": "Saying I taught the royal daughter the noble art of hunting. Agreed?",
+    "kind": "continuation",
+    "reason": "The brief tag completes the preceding sentence."
+  },
+  {
+    "start_row": 1208,
+    "end_row": 1209,
+    "ru": "Жребий. 1-й Министр, вы – первый.",
+    "en": "Draw lots. First Minister, you go first.",
+    "kind": "same-speaker",
+    "reason": "The short decision and instruction are one immediate action."
+  },
+  {
+    "start_row": 1231,
+    "end_row": 1232,
+    "ru": "— Это?...\n— Это скорее буква «Х».",
+    "en": "— It's...?\n— It's more like the letter X.",
+    "kind": "dialogue",
+    "reason": "A hesitant prompt and direct completion fit one line each."
+  },
+  {
+    "start_row": 1297,
+    "end_row": 1298,
+    "ru": "— Только одно. Есть любовь?..\n— Есть, если Вам угодно.",
+    "en": "— Just this: does love exist?\n— It does, if you wish it.",
+    "kind": "dialogue",
+    "reason": "A compact question and answer fit one line each."
+  },
+  {
+    "start_row": 1335,
+    "end_row": 1336,
+    "ru": "Подождите, так что ж выходит? Я — Ваш жених?",
+    "en": "Wait—then what does that make me? Am I to be your bridegroom?",
+    "kind": "same-speaker",
+    "reason": "The two short questions express one realization."
+  },
+  {
+    "start_row": 1352,
+    "end_row": 1353,
+    "ru": "Поцеловались мы с ней, значит, а она говорит: «Ступайте, доложите папеньке, пока я переоденусь».",
+    "en": "So we kissed, and she said: ‘Go and tell Papa, while I change.’",
+    "kind": "continuation",
+    "reason": "The quoted subordinate clause completes the sentence."
+  },
+  {
+    "start_row": 1356,
+    "end_row": 1357,
+    "ru": "А я ей на это: «До свидания, Ваше Высочество! Кокетка этакая!...»",
+    "en": "So I said to her: ‘Goodbye, Your Highness! You little tease!...’",
+    "kind": "continuation",
+    "reason": "The address completes the split quotation."
+  },
+  {
+    "start_row": 1359,
+    "end_row": 1360,
+    "ru": "Эй, свита! Поищите в аптечке... Я сознание потерял.",
+    "en": "Find something in the medicine chest... I've lost consciousness.",
+    "kind": "same-speaker",
+    "reason": "The comic explanation immediately completes the request."
+  },
+  {
+    "start_row": 1375,
+    "end_row": 1376,
+    "ru": "Дочь нашлась. Все живы и здоровы!",
+    "en": "My daughter's back. Everyone is alive and well!",
+    "kind": "same-speaker",
+    "reason": "The two brief statements form one relieved report."
+  },
+  {
+    "start_row": 1417,
+    "end_row": 1418,
+    "ru": "Она упряма, как, как… как мы с вами когда-то!",
+    "en": "She is as stubborn as... as... as you and I once were!",
+    "kind": "continuation",
+    "reason": "The comparison was split before its complement."
+  },
+  {
+    "start_row": 1422,
+    "end_row": 1423,
+    "ru": "Как почетный святой, почетный великомученик,",
+    "en": "As honorary saint, honorary great martyr,",
+    "kind": "continuation",
+    "reason": "The rows are adjacent titles in one grammatical list."
+  },
+  {
+    "start_row": 1531,
+    "end_row": 1532,
+    "ru": "Я же всё для этого сделал: я завалил снегом эту гостиницу, я перекрыл все дороги,",
+    "en": "I did everything for you: I buried this inn in snow, I blocked every road,",
+    "kind": "continuation",
+    "reason": "The rows are adjacent clauses in one enumerated sentence."
+  },
+  {
+    "start_row": 1583,
+    "end_row": 1584,
+    "ru": "Пройдет время, и ты сочинишь другую. Прекрасную и веселую.",
+    "en": "In time, you'll make up another. A beautiful, merry one.",
+    "kind": "continuation",
+    "reason": "The short adjectival fragment completes its antecedent."
+  },
+  {
+    "start_row": 1596,
+    "end_row": 1597,
+    "ru": "отсрочила свадьбу на год и вот срок истекает через час.",
+    "en": "put off the wedding for a year, and that year runs out in an hour.",
+    "kind": "continuation",
+    "reason": "The second clause completes the sentence."
+  },
+  {
+    "start_row": 1637,
+    "end_row": 1638,
+    "ru": "Впрочем, вы можете не отвечать: и так понятно, что всё хорошо. Благополучно.",
+    "en": "No, don't answer. It's perfectly clear that all is well. Splendid, in fact.",
+    "kind": "continuation",
+    "reason": "The subordinate clause completes the stated conclusion."
+  },
+  {
+    "start_row": 1670,
+    "end_row": 1671,
+    "ru": "Ваше Превосходительство, По моему, по моему, Дурак!",
+    "en": "you, you, Your Excellency: in my, in my opinion, you're a fool!",
+    "kind": "continuation",
+    "reason": "The verdict completes the split address."
+  },
+  {
+    "start_row": 1676,
+    "end_row": 1677,
+    "ru": "Это что? Бунт?! Иди сюда!",
+    "en": "Is this mutiny?! Come here!",
+    "kind": "same-speaker",
+    "reason": "The accusation and immediate command form one outburst."
+  },
+  {
+    "start_row": 1693,
+    "end_row": 1694,
+    "ru": "— Правда?\n— Да.",
+    "en": "— Really?\n— Yes.",
+    "kind": "dialogue",
+    "reason": "A one-line question and one-line answer belong together."
+  },
+  {
+    "start_row": 1736,
+    "end_row": 1737,
+    "ru": "Вы её уморили. А винить будете меня.",
+    "en": "You have done her to death. And you will blame me for it.",
+    "kind": "same-speaker",
+    "reason": "The accusation and consequence are one immediate thought."
+  },
+  {
+    "start_row": 1745,
+    "end_row": 1746,
+    "ru": "Какой сегодня особенный день. Мне всё так удаётся сегодня.",
+    "en": "What an extraordinary day this is. Everything has gone my way today.",
+    "kind": "same-speaker",
+    "reason": "The two brief sentences express one continuous reflection."
+  },
+  {
+    "start_row": 1759,
+    "end_row": 1760,
+    "ru": "Оринтия, Аманда, вы счастливы замужем?",
+    "en": "Orinthia, Amanda, are the two of you happily married?",
+    "kind": "continuation",
+    "reason": "The two addressees belong to the same question."
+  },
+  {
+    "start_row": 1775,
+    "end_row": 1776,
+    "ru": "его всё нету, И ждать не стоит.",
+    "en": "still he is not here, and waiting is no use.",
+    "kind": "continuation",
+    "reason": "The conjunction completes the lyric sentence."
+  },
+  {
+    "start_row": 1778,
+    "end_row": 1779,
+    "ru": "Сегодня ночью я знаю точно, Оно иссякнет.",
+    "en": "Tonight, I know for certain, it will run dry.",
+    "kind": "continuation",
+    "reason": "The prediction completes its introductory clause."
+  },
+  {
+    "start_row": 1781,
+    "end_row": 1782,
+    "ru": "Плащом накроет, и я за нею Уйду покорно.",
+    "en": "She'll cloak me, and I will follow meekly.",
+    "kind": "continuation",
+    "reason": "The predicate completes the lyric sentence."
+  },
+  {
+    "start_row": 1814,
+    "end_row": 1816,
+    "ru": "— Как грустно, правда?\n— Правда.",
+    "en": "— How sad, is it not?\n— It is.",
+    "kind": "dialogue",
+    "reason": "The split question and very short reply fit one line each."
+  },
+  {
+    "start_row": 1855,
+    "end_row": 1856,
+    "ru": "Пусть так и будет.",
+    "en": "Let it be so.",
+    "kind": "continuation",
+    "reason": "The predicate completes the one-word opening."
+  },
+  {
+    "start_row": 1860,
+    "end_row": 1861,
+    "ru": "— А ты что не спишь?\n— Я дал слово. Тихо!",
+    "en": "— Why are you not asleep?\n— I gave my word. Hush!",
+    "kind": "dialogue",
+    "reason": "The immediate exchange fits one line per speaker."
+  },
+  {
+    "start_row": 1885,
+    "end_row": 1886,
+    "ru": "Слава храбрецам, которые осмеливаются любить, зная, что всему этому придет конец!",
+    "en": "Glory to the brave who dare to love, knowing that it all must end!",
+    "kind": "continuation",
+    "reason": "The participial clause completes the sentence."
+  },
+  {
+    "start_row": 1898,
+    "end_row": 1899,
+    "ru": "Но осталось эхо, это хорошо. Было и прошло.",
+    "en": "But the echo remains, and that is good. It was, and now is past.",
+    "kind": "continuation",
+    "reason": "The short conclusion completes the preceding clause."
+  }
+]

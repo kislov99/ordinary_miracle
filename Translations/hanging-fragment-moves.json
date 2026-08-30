@@ -1,0 +1,104 @@
+[
+  {
+    "row": 311,
+    "ru_fragment": "Пусть уезжает и найдет себе другую,",
+    "en_fragment": "Let him go and find someone else,",
+    "reason": "Moves the unfinished alternative-partner phrase to its continuation."
+  },
+  {
+    "row": 471,
+    "ru_fragment": "Простите,",
+    "en_fragment": "Forgive us",
+    "reason": "Moves the unfinished apology to the row that supplies its complement."
+  },
+  {
+    "row": 683,
+    "ru_fragment": "Ни ты,",
+    "en_fragment": "Neither you",
+    "reason": "Keeps the paired neither/nor construction together."
+  },
+  {
+    "row": 878,
+    "ru_fragment": "Давай открывай,",
+    "en_fragment": "Go on, open up,",
+    "reason": "Moves the unfinished command to its following address."
+  },
+  {
+    "row": 931,
+    "ru_fragment": "Эй,",
+    "en_fragment": "Hey,",
+    "reason": "Keeps the vocative call with the addressee it introduces."
+  },
+  {
+    "row": 984,
+    "ru_fragment": "Простая",
+    "en_fragment": "Guileless",
+    "reason": "Keeps the coordinated character description together."
+  },
+  {
+    "row": 1158,
+    "ru_fragment": "Я Вас провожу,",
+    "en_fragment": "I'll take you there,",
+    "reason": "Moves the unfinished offer to the row containing its address and condition."
+  },
+  {
+    "row": 1336,
+    "ru_fragment": "А",
+    "en_fragment": "And",
+    "reason": "Moves the conjunction to the question it introduces."
+  },
+  {
+    "row": 1419,
+    "ru_fragment": "Нет,",
+    "en_fragment": "No,",
+    "reason": "Moves the discourse opener to the assertion it qualifies."
+  },
+  {
+    "row": 1437,
+    "ru_fragment": "Хорошо,",
+    "en_fragment": "All right,",
+    "reason": "Moves the agreement cue to the action it introduces."
+  },
+  {
+    "row": 1482,
+    "ru_fragment": "Доброе",
+    "en_fragment": "Something",
+    "reason": "Keeps the split noun phrase together."
+  },
+  {
+    "row": 1485,
+    "ru_fragment": "Может быть,",
+    "en_fragment": "Perhaps",
+    "reason": "Moves the modal opener to the proposal it qualifies."
+  },
+  {
+    "row": 1491,
+    "ru_fragment": "Он",
+    "en_fragment": "He'll",
+    "reason": "Keeps the subject and auxiliary with their predicate."
+  },
+  {
+    "row": 1667,
+    "ru_fragment": "Он",
+    "en_fragment": "He",
+    "reason": "Keeps the subject with the predicate describing the cook."
+  },
+  {
+    "row": 1727,
+    "ru_fragment": "Свиньи вы,",
+    "en_fragment": "You're swine,",
+    "reason": "Keeps the unfinished contrast with its completing phrase."
+  },
+  {
+    "row": 1825,
+    "ru_fragment": "Спи,",
+    "en_fragment": "Sleep,",
+    "reason": "Keeps the imperative with its term of endearment."
+  },
+  {
+    "row": 1833,
+    "ru_fragment": "Вот",
+    "en_fragment": "Then",
+    "reason": "Moves the result opener to the clause it introduces."
+  }
+]
