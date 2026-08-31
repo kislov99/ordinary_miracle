@@ -79,21 +79,6 @@
     font-size: 0.92em;
     scroll-margin-top: 8px;
   }
-  .scene-header.has-roles { cursor: pointer; }
-  .scene-header-top::after { content: ' ▾'; opacity: 0.6; font-size: 0.85em; }
-  .scene-header.open .scene-header-top::after { content: ' ▴'; }
-  .scene-roles {
-    display: none;
-    margin: 5px -11px -7px;
-    padding: 5px 11px 6px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 0 0 6px 6px;
-    font-size: 0.85em;
-    font-weight: normal;
-    color: rgba(255,255,255,0.88);
-    line-height: 1.5;
-  }
-  .scene-header.open .scene-roles { display: block; }
   .act-header {
     margin: 28px 0 8px;
     padding: 6px 0;
@@ -581,6 +566,7 @@ function parse(text) {
   const rawLines = text.split(/\r?\n/);
   let started = false, currentScene = null, currentSpeaker = null, buffer = [];
   let songSpeaker = null;
+  let continuationSpeaker = null;
   let pendingOrphans = [];
   let seenRolesInScene = new Set();
 
@@ -625,6 +611,7 @@ function parse(text) {
     if (!s) { flush(); continue; }
     if (/^[🎵🎶]/.test(s)) {
       flush();
+      continuationSpeaker = null;
       if (started) {
         entries.push({ kind:'music', text:s, scene:currentScene });
         const kuplet = detectKupletyRole(s);
@@ -635,6 +622,7 @@ function parse(text) {
     const actLabel = detectAct(s);
     if (actLabel) {
       flush();
+      continuationSpeaker = null;
       abandonPending();
       entries.push({ kind:'act', text: actLabel });
       if (!acts.includes(actLabel)) acts.push(actLabel);
@@ -644,6 +632,7 @@ function parse(text) {
     const sm = s.match(/^СЦЕНА\s+(\d+\.\d+)\s*(.*)$/);
     if (sm) {
       flush();
+      continuationSpeaker = null;
       abandonPending();
       songSpeaker = null;
       seenRolesInScene = new Set();
@@ -664,6 +653,7 @@ function parse(text) {
       }
     }
     if (rl) {
+      continuationSpeaker = null;
       flush();
       currentSpeaker = rl.role;
       seenRolesInScene.add(rl.role);
@@ -692,6 +682,7 @@ function parse(text) {
     }
     if (currentSpeaker) {
       if (isStage) {
+        continuationSpeaker = currentSpeaker;
         flush();
         entries.push({ kind:'stage', text:s, scene:currentScene });
       } else {
@@ -705,6 +696,10 @@ function parse(text) {
       } else {
         pendingOrphans.push(s);
       }
+    } else if (continuationSpeaker) {
+      currentSpeaker = continuationSpeaker;
+      continuationSpeaker = null;
+      buffer.push(s);
     } else {
       entries.push({ kind:'stage', text:s, scene:currentScene });
     }
@@ -779,21 +774,7 @@ function render() {
       const h = document.createElement('div');
       h.className = 'scene-header';
       h.id = 'scene-' + sceneIdx;
-      if (e.roles && e.roles.length) {
-        h.classList.add('has-roles');
-        if (!hidden) h.classList.add('open');
-        const top = document.createElement('div');
-        top.className = 'scene-header-top';
-        top.textContent = e.text;
-        const rolesDiv = document.createElement('div');
-        rolesDiv.className = 'scene-roles';
-        rolesDiv.textContent = e.roles.join(' · ');
-        h.appendChild(top);
-        h.appendChild(rolesDiv);
-        h.addEventListener('click', ev => { ev.stopPropagation(); h.classList.toggle('open'); });
-      } else {
-        h.textContent = e.text;
-      }
+      h.textContent = e.text;
       scriptEl.appendChild(h);
       continue;
     }
